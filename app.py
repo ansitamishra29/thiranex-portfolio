@@ -11,7 +11,24 @@ app = Flask(__name__)
 
 
 
+
 def get_db_connection():
+    ca_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "ca.pem"
+    )
+
+    return mysql.connector.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        port=int(os.getenv("DB_PORT", "3306")),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME", "defaultdb"),
+        ssl_ca=ca_path,
+        ssl_verify_cert=True,
+        ssl_verify_identity=True
+    )
+
     return mysql.connector.connect(
         host=os.getenv("DB_HOST", "localhost"),
         user=os.getenv("DB_USER", "root"),
@@ -39,7 +56,18 @@ def home():
 
     except Exception as error:
         print("PROJECTS ERROR:", error)
-
+        if not projects:
+          projects = [{
+            "title": "StudyFocus",
+            "description": (
+                "A student-focused project designed to support "
+                "better study habits and time management."
+            ),
+            "technologies": (
+                "HTML, CSS, JavaScript, Python, Flask, MySQL"
+            ),
+            "project_link": ""
+        }]
     return render_template(
     "portfolio.html",
     projects=projects,
